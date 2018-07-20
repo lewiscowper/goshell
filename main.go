@@ -3,21 +3,12 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/lewiscowper/shell/builtins"
 	"github.com/mgutz/ansi"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
-	"github.com/lewiscowper/shell/builtins"
 )
-
-func clear() {
-	if runtime.GOOS == "windows" {
-		exec.Command("cls")
-	} else {
-		exec.Command("clear")
-	}
-}
 
 func execInput(input string) error {
 	// Remove the newline character
@@ -36,7 +27,7 @@ func execInput(input string) error {
 
 		return nil
 	case "clear":
-		clear()
+		builtins.Clear()
 	case "exit":
 		os.Exit(0)
 	}
