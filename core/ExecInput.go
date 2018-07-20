@@ -9,6 +9,9 @@ import (
 
 // ExecInput takes an input string and executes it
 func ExecInput(input string) error {
+	// Remove the newline character
+	input = strings.TrimSuffix(input, "\n")
+
 	// Split the input to separate the command and the arguments
 	args := strings.Split(input, " ")
 

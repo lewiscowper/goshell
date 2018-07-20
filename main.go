@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/lewiscowper/shell/core"
 	"os"
-	"strings"
 )
 
 func main() {
@@ -30,9 +29,6 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
-
-		// Remove the newline character
-		input = strings.TrimSuffix(input, "\n")
 
 		// Handle the execution of the input
 		err = core.ExecInput(input)
