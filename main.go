@@ -10,7 +10,6 @@ import (
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 	promptChar := os.Getenv("PROMPTCHAR")
-	promptColor := os.Getenv("PROMPTCOLOR")
 
 	exitStatus := 0
 
