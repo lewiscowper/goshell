@@ -3,23 +3,15 @@ package builtins
 import (
 	"errors"
 	"fmt"
+	"github.com/lewiscowper/shell/helpers"
 	"os"
 	"os/user"
+	"path/filepath"
 	"strings"
 )
 
 // ErrTooManyArgs is returned when 'cd' was called with too many arguments
 var ErrTooManyArgs = errors.New("Too many arguments passed to cd")
-
-func goHome(usr *user.User) error {
-	err := os.Chdir(usr.HomeDir)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
 
 func getUser() (*user.User, error) {
 	usr, err := user.Current()
@@ -30,58 +22,58 @@ func getUser() (*user.User, error) {
 	return usr, nil
 }
 
-func goUserHome() error {
-	usr, err := getUser()
-	if err != nil {
-		return err
-	}
-
-	errr := goHome(usr)
-	if errr != nil {
-		return err
-	}
-
-	return nil
-}
-
 // Cd changes the user directory, handling special cases with ~ replacement to user's home directory
-func Cd(args []string) error {
+func Cd(ctx *helpers.ShellContext, args []string) error {
 	if len(args) > 2 {
 		return ErrTooManyArgs
 	}
 
-	// `cd` to home dir with empty path
-	if len(args) < 2 || args[1] == "~" {
-		err := goUserHome()
-		if err != nil {
-			return err
-		}
+	targetPath := args[0]
 
-		return nil
-	}
-
-	if args[1] == "..." || args[1] == "...." {
+	if targetPath == "..." || targetPath == "...." {
 		fmt.Println("cd using more than 2 dots as parent directories is not implemented yet")
 	}
 
-	// replace ~ with user home directory
-	pathArgs := strings.Split(args[1], string(os.PathSeparator))
+	pathArgs := strings.Split(targetPath, string(os.PathSeparator))
 
-	if pathArgs[0] == "~" {
+	switch pathArgs[0] {
+	case "~":
 		usr, err := getUser()
 		if err != nil {
 			return err
 		}
 
 		pathArgs[0] = usr.HomeDir
+	case "-":
+		if len(ctx.DirStack) == 1 {
+			usr, err := getUser()
+			if err != nil {
+				return err
+			}
+
+			pathArgs[0] = usr.HomeDir
+		}
+		pathArgs[0] = ctx.DirStack[len(ctx.DirStack)-1]
 	}
 
 	path := strings.Join(pathArgs, string(os.PathSeparator))
 
-	err := os.Chdir(path)
+	finalPath, err := filepath.Abs(path)
 	if err != nil {
 		return err
 	}
+
+	err = os.Chdir(finalPath)
+	if err != nil {
+		return err
+	}
+
+	var ds []string
+
+	ctx.DirStack = helpers.AppendIfMissing(ds, ctx.DirStack[len(ctx.DirStack)-1])
+	ctx.DirStack = helpers.AppendIfMissing(ctx.DirStack, finalPath)
+
+	fmt.Println(ctx.DirStack)
 
 	return nil
 }

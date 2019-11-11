@@ -3,15 +3,12 @@ package core
 import (
 	"fmt"
 	"github.com/mgutz/ansi"
+
+	"github.com/lewiscowper/shell/helpers"
 )
 
-// PromptParams are the struct to store the arguments in so I can "provide" default values
-type PromptParams struct {
-	Char, Color string
-}
-
 // BuildPrompt will build the prompt as needed
-func BuildPrompt(p PromptParams) string {
+func BuildPrompt(p helpers.PromptParams) string {
 	if p.Char == "" {
 		p.Char = ">"
 	}
